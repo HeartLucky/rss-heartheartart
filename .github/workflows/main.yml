@@ -2,8 +2,8 @@ name: Update RSS Feed
 
 on:
   schedule:
-    - cron: '0 * * * *'
-  workflow_dispatch:
+    - cron: '0 * * * *'  # 每小时第 0 分钟运行
+  workflow_dispatch:      # 允许你手动点击按钮运行
 
 jobs:
   build:
@@ -12,34 +12,37 @@ jobs:
       contents: write
       
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
+          cache: 'pip' # 开启缓存加速运行
 
-      - name: Install dependencies
+      - name: Install Tools
         run: |
           pip install ntscraper feedgen
 
-      - name: Run scraper
+      - name: Run Scraper
         run: python main.py
 
-      - name: Commit and Push changes
+      - name: Push to Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 只有当文件确实发生变化时才提交，避免无效记录
           if [ -f feed.xml ]; then
             git add feed.xml
             if git diff --staged --quiet; then
-              echo "No changes to commit"
+              echo "没有新内容，跳过提交。"
             else
-              git commit -m "Automated RSS update"
+              git commit -m "自动更新: 获取最新二创动态"
               git push
             fi
           else
-            echo "Error: feed.xml not found"
+            echo "错误：未找到 feed.xml，请检查脚本日志。"
             exit 1
           fi
