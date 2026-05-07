@@ -31,15 +31,21 @@ jobs:
       - name: Run scraper
         run: python main.py
 
-      - name: Commit and Push changes
+- name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # 检查是否有文件更新，防止没新推文时报错
-          git add feed.xml
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
+          
+          # 检查文件是否存在，存在才 commit
+          if [ -f feed.xml ]; then
+            git add feed.xml
+            if git diff --staged --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "Automated RSS update"
+              git push
+            fi
           else
-            git commit -m "Automated RSS update"
-            git push
+            echo "错误：找不到 feed.xml 文件，脚本可能运行失败了。"
+            exit 1
           fi
