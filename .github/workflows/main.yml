@@ -2,7 +2,7 @@ name: Update RSS Feed
 
 on:
   schedule:
-    - cron: '0 * * * *'  # 每小时第 0 分钟运行
+    - cron: '17 * * * *'  # 每小时第 17 分钟运行
   workflow_dispatch:      # 允许你手动点击按钮运行
 
 jobs:
